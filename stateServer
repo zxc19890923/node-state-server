@@ -1,0 +1,41 @@
+var http = require("http");
+fs = require("fs");
+// 定义获取数据的函数, 请求结果res, 文件地址, 类型, 请求码
+function serverStateFile(res, path, contentType, responseCode) {
+    // 设置默认请求状态 成功 200
+    if(!responseCode) {
+        responseCode = 200;
+    }
+    fs.readFile(__dirname + path, function(err, data) {
+        if(err) {
+            res.writeHead(500, {"Content-Type": "text/html"});
+            res.write("<meta charset='utf-8' />");
+            res.end("读取文件失败");
+            console.log(err);
+        }
+        else {
+            res.writeHead(responseCode, {"Content-Type": contentType});
+            res.write("<meta charset='utf-8' />");
+            res.end(data);
+        }
+    })
+}
+
+http.createServer(function(req, res) {
+    var path = req.url.replace(/\/?(?:\?.*)?$/, "").toLowerCase();
+    switch(path) {
+        case "":
+            serverStateFile(res, "/public/home.html", "text/html");
+            break;
+        case "/about":
+            serverStateFile(res, "/public/about.html", "text/html");
+            break;
+        case "/img":
+            serverStateFile(res, "/public/logo.jpg", "image/jpeg");
+            break;
+        default:
+            serverStateFile(res, "/public/404.html", "text/html", 404);
+            break;
+    }
+}).listen(9000);
+console.log("成功");
